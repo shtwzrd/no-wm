@@ -4,8 +4,7 @@
 # modified by warreq 2016
 # Create a small popup with the given text
 #
-# depends: lemonbar, wattr, wmutils.conf
-
+# depends: lemonbar [patched with xft support], wattr, wmutils.conf
 
 # bar options
 #font='-*-stlarch-medium-r-*-*-10-*-*-*-*-*-*-*'
@@ -17,23 +16,30 @@ default_geometry() {
     height=28
     offy=10
     offx=$(( $SW - $SW/2 - $width/2 ))
-
     echo "${width}x${height}+${offx}+${offy}"
+}
+
+modal_geometry() {
+    height=200
+    offy=$((SH - SH/2 - height/2))
+    echo "${SW}x${height}+0+${offy}"
 }
 
 test "$#" -lt 1 && exit 1
 
 g=${g:-$(default_geometry)}
 n=${n:-3}
+f=${f:-$MONOTTF}
 
-while getopts "d:g:h" opt; do
+while getopts "d:g:mh" opt; do
     case $opt in
         d) n=$OPTARG & shift 2 ;;
         g) g=$OPTARG & shift 2 ;;
+        m) g=$(modal_geometry) && f="$f-36" && shift ;;
         h) usage; exit 0 ;;
         *) usage; exit 1 ;;
     esac
 done
 
-(echo "%{c}$@"; sleep $n) | lemonbar -d -g $g -f $MONOTTF -B "#$(xbg)" -F "#$(xfg)"
+(echo "%{c}$@"; sleep $n) | lemonbar -d -g $g -f "$f" -B "#$(xbg)" -F "#$(xfg)"
 
