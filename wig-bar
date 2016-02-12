@@ -1,4 +1,0 @@
-#!/bin/sh
-wendy -m 774 -f ~/tmp/wig.d/ACTIVE -e \
-    wig -b | lemonbar -bdp -fa "Dejavu Sans Mono" -u 2 -B "#00000000"
-
