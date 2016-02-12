@@ -2,44 +2,76 @@
 #
 # z3bra - (c) wtfpl 2014
 # modified by warreq 2016
-# Create a small popup with the given text
+# Create a small popup with the given text. Multi-head aware.
 #
-# depends: lemonbar [patched with xft support], wattr, wmutils.conf
-
-# bar options
-#font='-*-stlarch-medium-r-*-*-10-*-*-*-*-*-*-*'
+# depends: lemonbar [xft patched], wmutils.conf, ls-disp, geo-disp
 
 . wmutils.conf
 
+usage() {
+    cat << EOF
+usage: $(basename $0) [-hm] [-g geometry] [-n duration] [-d display] (TEXT)
+       -h shows this help
+       -n how many seconds the message should display before disappearing
+       -g alternate geometry of form WxH+X+Y
+       -d Name of display (e.g. VGA1) to show on. Defaults to all displays
+       -m use centered, full-width banner geometry instead of the default
+EOF
+}
+
 default_geometry() {
     width=256
-    height=28
-    offy=10
-    offx=$(( $SW - $SW/2 - $width/2 ))
-    echo "${width}x${height}+${offx}+${offy}"
+    offx=$(( $SW - $SW/2 - $width/2 + $1/2 ))
+    echo "${width}x28+${offx}+10"
 }
 
 modal_geometry() {
     height=200
-    offy=$((SH - SH/2 - height/2))
-    echo "${SW}x${height}+0+${offy}"
+    offy=$(($4/2 - height/2))
+    echo "${3}x${height}+${1}+${offy}"
+}
+
+# $1= Disp X, $2 = Disp Y, $3 = Disp Width, $4 = Disp Height, $5 = style
+get_geometry() {
+    if [ "$5" = "modal" ]; then
+        echo "$(modal_geometry $1 $2 $3 $4)"
+    else
+        echo "$(default_geometry $1 $2 $3 $4)"
+    fi
+}
+
+# $1 = Display Descriptor (e.g. HDMI1)
+show_popup() {
+    read DX DY DW DH <<< $(geo-disp $1)
+    g=$(get_geometry $DX $DY $DW $DH $style)
+    (echo "%{c}$msg"; sleep $n) | \
+        lemonbar -g "$g" -f "$f" -B "#$(xbg)" -F "#$(xfg)" -d
 }
 
 test "$#" -lt 1 && exit 1
 
-g=${g:-$(default_geometry)}
 n=${n:-3}
 f=${f:-$MONOTTF}
+d=${d:-}
+style="default"
 
-while getopts "d:g:mh" opt; do
+while getopts "mn:g:d:h" opt; do
     case $opt in
-        d) n=$OPTARG & shift 2 ;;
-        g) g=$OPTARG & shift 2 ;;
-        m) g=$(modal_geometry) && f="$f-36" && shift ;;
+        m) style="modal"; f="$f-36" ;;
+        n) n=$OPTARG ;;
+        g) g=$OPTARG ;;
+        d) d=$OPTARG ;;
         h) usage; exit 0 ;;
-        *) usage; exit 1 ;;
+        ?) usage; exit 1 ;;
     esac
 done
+shift $((OPTIND-1))
+msg=${msg:-"$@"}
 
-(echo "%{c}$@"; sleep $n) | lemonbar -d -g $g -f "$f" -B "#$(xbg)" -F "#$(xfg)"
-
+if [ -z "$d" ]; then # show on all displays
+    ls-disp | while IFS=: read disp; do
+                  show_popup $disp &
+              done
+else
+    show_popup $d
+fi

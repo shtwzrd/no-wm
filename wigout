@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2016 warreq, licensed under the WTFPL
+# warreq (c) 2016, UNLICENSE
 # outputs a string describing the visibility of the window groups
 
 # depends on: wmutils.conf, [lemonbar for -b option], Greduan-based group script
