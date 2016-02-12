@@ -10,7 +10,7 @@
 
 usage() {
     cat << EOF
-usage: $(basename $0) [-hm] [-g geometry] [-n duration] [-d display] (TEXT)
+usage: $(basename $0) [-hm] [-g geometry] [-n duration] [-d display] TEXT
        -h shows this help
        -n how many seconds the message should display before disappearing
        -g alternate geometry of form WxH+X+Y
@@ -21,7 +21,7 @@ EOF
 
 default_geometry() {
     width=256
-    offx=$(( $SW - $SW/2 - $width/2 + $1/2 ))
+    offx=$(( $3/2 - $width/2 + $1 ))
     echo "${width}x28+${offx}+10"
 }
 
