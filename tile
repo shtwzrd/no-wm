@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# z3bra - 2014 (c) wtfpl
+# modified by warreq - 2016
+#
+# arrange windows in a tiled pattern
+# depends on wmutils.conf
+
+. wmutils.conf
+
+MASTER=${MASTER:-$((SW/2))}
+
+# get current window
+PFW=$(pfw)
+
+# get the number of windows to put in the stacking area
+MAX=$(lsw|grep -v $PFW|wc -l)
+
+# calculate usable screen size (without borders and gaps)
+SW=$((SW - XGAP - 2*BW))
+SH=$((SH - XGAP - 2*BW))
+
+Y=$((0 + TGAP))
+# put current window in master area
+wtp $XGAP $Y $((MASTER - XGAP - 2*BW)) $((SH)) $PFW
+
+# and now, stack up all remaining windows on the right
+X=$((MASTER + XGAP))
+W=$((SW - MASTER - XGAP))
+H=$((SH / MAX - BGAP - 2*BW))
+
+for wid in $(lsw|grep -v $PFW); do
+    wtp $X $Y $W $H $wid
+    Y=$((Y + H + XGAP + 2*BW))
+done

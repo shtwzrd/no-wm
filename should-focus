@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# should-focus
+# warreq (c) UNLICENSE
+#
+# returns 1 on windows I'd rather not focus
+
+usage() {
+    echo "usage: $(basename $0) <wid>"
+}
+
+if lsw | grep -q $1 && xprop -id $1 | grep -q "_NET_WM_WINDOW_TYPE_DOCK"; then
+   exit 1
+else
+   exit 0
+fi

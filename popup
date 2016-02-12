@@ -1,0 +1,39 @@
+#!/bin/sh
+#
+# z3bra - (c) wtfpl 2014
+# modified by warreq 2016
+# Create a small popup with the given text
+#
+# depends: lemonbar, wattr, wmutils.conf
+
+
+# bar options
+#font='-*-stlarch-medium-r-*-*-10-*-*-*-*-*-*-*'
+
+. wmutils.conf
+
+default_geometry() {
+    width=256
+    height=28
+    offy=10
+    offx=$(( $SW - $SW/2 - $width/2 ))
+
+    echo "${width}x${height}+${offx}+${offy}"
+}
+
+test "$#" -lt 1 && exit 1
+
+g=${g:-$(default_geometry)}
+n=${n:-3}
+
+while getopts "d:g:h" opt; do
+    case $opt in
+        d) n=$OPTARG & shift 2 ;;
+        g) g=$OPTARG & shift 2 ;;
+        h) usage; exit 0 ;;
+        *) usage; exit 1 ;;
+    esac
+done
+
+(echo "%{c}$@"; sleep $n) | lemonbar -d -g $g -f $MONOTTF -B "#$(xbg)" -F "#$(xfg)"
+

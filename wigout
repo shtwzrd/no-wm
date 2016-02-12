@@ -1,0 +1,46 @@
+#!/bin/sh
+# Copyright (c) 2016 warreq, licensed under the WTFPL
+# outputs a string describing the visibility of the window groups
+
+# depends on: wmutils.conf, [lemonbar for -b option], Greduan-based group script
+
+. wmutils.conf
+
+usage() {
+    cat << EOF
+usage: $(basename $0) [-bth]
+       -h shows this help
+       -s output lemonbar-formatted string
+       -t output a tree-view of all windows
+EOF
+}
+
+bar() {
+    OUT=" "
+    g=1
+    while [ "$g" -le "$GROUPCOUNT" ]
+    do
+        OUT="$OUT%{F#$(xcolor $g)}"
+        if ! grep -q $g < $GROUPSDIR/all; then
+            OUT="$OUT□ "
+        else
+            if grep -q $g $GROUPSDIR/active; then
+                OUT="$OUT■ "
+            else
+                OUT="$OUT▧ "
+            fi
+        fi
+        g=$(($g+1))
+    done
+    echo "$OUT"
+}
+
+while getopts "hst" opt; do
+    case $opt in
+        h) usage && exit 0 ;;
+        s) bar ;;
+        t) printf "not implemented ¯\_(ツ)_/¯" && exit 1 ;;
+    esac
+done
+
+

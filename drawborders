@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# Copyright (c) 2016 warreq UNLICENSE
+# Sets borders of of active windows according to their group
+
+. wmutils.conf
+
+while read active; do
+    while read line; do
+        chwb -c "$(xcolor $active)" -s $BW $line
+    done < $GROUPSDIR/group.$active
+done < $GROUPSDIR/active
