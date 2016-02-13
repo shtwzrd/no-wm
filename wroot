@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# warreq 2016 (c) UNLICENSE
+# multi-head aware wallpaper script with blurring capability
+#
+# depends on: bgs, imagemagick, ls-disp, wmutils.conf
+
+. wmutils.conf
+
+usage() {
+    cat <<EOF
+usage: $(basename $0) [-nbuh]
+       -h shows this help
+       -n set a new wallpaper (reads WALL from wmutils.conf)
+       -b blur the current wallpaper (reads BLUR from wmutils.conf)
+       -u unblur the current wallpaper
+EOF
+}
+
+per_screen() {
+    a=""; i=0; n=$(ls-disp | wc -l)
+    while [ $i -lt $n ]; do
+        a="$a $1"; i=`expr $i + 1`
+    done
+    bgs $a
+}
+
+while getopts "nbuh" opt; do
+    case $opt in
+        h) usage && exit 0 ;;
+        n) convert $WALL -blur $BLUR "$WALL-blur"
+           per_screen $WALL; break ;;
+        b) per_screen $WALL-blur; break ;;
+        u) per_screen $WALL; break ;;
+        ?) usage && exit 1 ;;
+    esac
+done
