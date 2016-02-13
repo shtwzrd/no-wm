@@ -3,6 +3,8 @@
 # full screen to monitor
 # usage: fsm <mon> <windowid>
 
+. wmutils.conf
+
 usage () {
     echo "usage: $(basename $0) <disp> <wid>"
     exit 0
@@ -14,7 +16,7 @@ set_full () {
     local monitor=$1
     local window=$2
     wattr xywhi $window >$tempfile
-    wtp $(geo_disp.sh $monitor) $window
+    wtp $(geo-disp $monitor) $window
     wtf $window
     chwb -s 0 $window
     chwso -r $window
@@ -29,13 +31,13 @@ unset_full () {
 
 display=$1
 windowid=$2
-tempfile="/tmp/fs_data_$display"
+tempfile="$FULLSCREENDIR/$display"
 
 # All them checks.
 test -z "$1" && test -z "$2" && usage
 
 # check if display is valid
-ls_disp.sh | grep -q $display || usage
+ls-disp | grep -q $display || usage
 
 # check if windowid is valid
 lsw | grep -q $windowid || usage
