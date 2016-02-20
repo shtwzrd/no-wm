@@ -7,6 +7,7 @@
 handle_map() {
     if should-focus $1 ; then
         focus $wid
+        wig -s $wid
         test "$(lsw | wc -l)" -ne 0 && wroot -b
     fi
 }
