@@ -12,7 +12,9 @@ usage: $(basename $0) [-hCU] [-c wid] [-s wid group] [-tmMu group]
        -c cleans WID from group files (and makes it visible)
        -C runs cleanup routine
        -s sets WID's group
+       -S toggle sticky-mode (new windows spawn into last activated group)
        -t toggle group visibility state
+       -T toggle group to be the only visible group
        -m maps (shows) group
        -M maps group and unmaps all other groups
        -u unmaps (hides) group
@@ -54,7 +56,9 @@ map_group() {
     # loop through group and map windows
     while read line; do
         mapw -m $line
-    done < $GROUPSDIR/group.$1
+    done < $GROUPSDIR/group."$1"
+
+    echo "$1" > $GROUPSDIR/last
 }
 
 # hides all the windows in group ($1)
@@ -76,30 +80,39 @@ unmap_group() {
     done < $GROUPSDIR/group.$1
 }
 
-# assigns WID ($1) to the group ($2)
+# assigns WID ($1) to the group ($2), or the last active if not specified
 set_group() {
+    g="$2"
+    if [ -z "$2" ]; then
+        if [ -z "$(head -n 1 $GROUPSDIR/sticky)" ]; then
+            exit 0
+        else
+            g="$(head -n 1 $GROUPSDIR/last)"
+        fi
+    fi
+
     # make sure we've no duplicates
     clean_wid $1
-    clean_status $2
+    clean_status $g
 
     # create if group doesn't exist
-    touch $GROUPSDIR/group.$2
+    touch $GROUPSDIR/group.$g
 
     # insert WID into new group if not already there
-    grep -q $1 < $GROUPSDIR/group.$2 || \
-        echo $1 >> $GROUPSDIR/group.$2
+    grep -q $1 < $GROUPSDIR/group.$g || \
+        echo $1 >> $GROUPSDIR/group.$g
 
     # if we can't find the group add it to groups and make it active
-    grep -q $2 < $GROUPSDIR/all || \
-        echo $2 >> $GROUPSDIR/all && \
-        echo $2 >> $GROUPSDIR/active
+    grep -q $g < $GROUPSDIR/all || \
+        echo $g >> $GROUPSDIR/all && \
+        echo $g >> $GROUPSDIR/active
 
     # map WID if group is active
-    grep -q $2 < $GROUPSDIR/active && \
+    grep -q $g < $GROUPSDIR/active && \
     mapw -m $1
 
     # unmap WID if group is inactive
-    grep -q $2 < $GROUPSDIR/inactive && \
+    grep -q $g < $GROUPSDIR/inactive && \
     mapw -u $1
 }
 
@@ -120,6 +133,15 @@ toggle_group() {
     grep -q $1 < $GROUPSDIR/inactive && \
     map_group $1 && \
     return
+}
+
+# switch between 'sticky' (put window into last group by default) and not
+toggle_sticky() {
+    if [ -z "$(head -n 1 $GROUPSDIR/sticky)" ]; then
+        echo "yes" > $GROUPSDIR/sticky
+    else
+        cat /dev/null > $GROUPSDIR/sticky
+    fi
 }
 
 # removes all the unexistent WIDs from groups
@@ -160,11 +182,13 @@ test -d $GROUPSDIR || mkdir -p $GROUPSDIR
 test -f $GROUPSDIR/active || :> $GROUPSDIR/active
 test -f $GROUPSDIR/inactive || :> $GROUPSDIR/inactive
 test -f $GROUPSDIR/all || :> $GROUPSDIR/all
+test -f $GROUPSDIR/sticky || :> $GROUPSDIR/sticky
+test -f $GROUPSDIR/last || :> $GROUPSDIR/last
 
 cleanup_everything
 
 # getopts yo
-while getopts "hc:Cs:t:T:m:M:u:U" opt; do
+while getopts "hc:CSs:t:T:m:M:u:U" opt; do
     case $opt in
         h)
             usage && exit 0
@@ -180,6 +204,10 @@ while getopts "hc:Cs:t:T:m:M:u:U" opt; do
             ;;
         s)
             set_group $OPTARG $(eval echo "\$$OPTIND")
+            break
+            ;;
+        S)
+            toggle_sticky $OPTARG
             break
             ;;
         t)
