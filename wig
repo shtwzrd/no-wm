@@ -180,7 +180,7 @@ test -f $GROUPSDIR/active || :> $GROUPSDIR/active
 test -f $GROUPSDIR/inactive || :> $GROUPSDIR/inactive
 test -f $GROUPSDIR/all || :> $GROUPSDIR/all
 test -f $GROUPSDIR/sticky || :> $GROUPSDIR/sticky
-test -f $GROUPSDIR/last || :> $GROUPSDIR/last
+test -f $GROUPSDIR/last || echo '1' > $GROUPSDIR/last
 
 cleanup_everything
 
