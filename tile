@@ -25,8 +25,7 @@ wtp $((DX + XGAP)) $Y $((MASTER - XGAP - 2*BW)) $((DH - TGAP - BGAP)) $CUR
 # and now, stack up all remaining windows on the right
 X=$((DX + MASTER + XGAP))
 W=$((DW - MASTER - XGAP*2 - 2*BW))
-H=$((DH - BGAP - TGAP - 2*BW - XGAP*MAX))
-H=$((H / MAX))
+H=$(((DH - BGAP - TGAP - 2*BW*(MAX-1) - XGAP*(MAX -1)) / MAX))
 
 for wid in $(lsw-disp | grep -v $CUR); do
     wtp $X $Y $W $H $wid
