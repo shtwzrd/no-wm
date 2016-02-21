@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# warreq - 2016 (c) UNLICENSE
+
+# list windows only for the current display (the one with the $(pfw))
+# depends on: current-disp
+
+CUR_DISP=$(current-disp $(pfw))
+for wid in $(lsw); do
+    if [ "$CUR_DISP" = "$(current-disp $wid)" ]; then
+       echo $wid
+    fi
+done
+

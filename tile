@@ -4,32 +4,31 @@
 # modified by warreq - 2016
 #
 # arrange windows in a tiled pattern
-# depends on wmutils.conf
+# depends on: wmutils.conf, geo-disp, current-disp
 
 . wmutils.conf
 
-MASTER=${MASTER:-$((SW/2))}
-
-# get current window
-PFW=$(pfw)
+read DX DY DW DH <<< $(geo-disp $(current-disp $CUR))
+MASTER=${MASTER:-$((DW/2))}
 
 # get the number of windows to put in the stacking area
-MAX=$(lsw|grep -v $PFW|wc -l)
+MAX=$(lsw-disp | grep -v $PFW|wc -l)
 
 # calculate usable screen size (without borders and gaps)
-SW=$((SW - XGAP - 2*BW))
-SH=$((SH - XGAP - 2*BW))
+SW=$((DW - XGAP - 2*BW))
+SH=$((DH - XGAP - 2*BW))
 
-Y=$((0 + TGAP))
+Y=$((DY + 0 + TGAP))
 # put current window in master area
-wtp $XGAP $Y $((MASTER - XGAP - 2*BW)) $((SH)) $PFW
+wtp $((DX + XGAP)) $Y $((MASTER - XGAP - 2*BW)) $((DH - TGAP - BGAP)) $CUR
 
 # and now, stack up all remaining windows on the right
-X=$((MASTER + XGAP))
-W=$((SW - MASTER - XGAP))
-H=$((SH / MAX - BGAP - 2*BW))
+X=$((DX + MASTER + XGAP))
+W=$((DW - MASTER - XGAP*2 - 2*BW))
+H=$((DH - BGAP - TGAP - 2*BW - XGAP*MAX))
+H=$((H / MAX))
 
-for wid in $(lsw|grep -v $PFW); do
+for wid in $(lsw-disp | grep -v $CUR); do
     wtp $X $Y $W $H $wid
     Y=$((Y + H + XGAP + 2*BW))
 done
