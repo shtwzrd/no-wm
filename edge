@@ -1,0 +1,18 @@
+#!/bin/sh
+# snap window to top, bottom, left or right half of display
+
+. wmutils.conf
+
+read DX DY DW DH <<< $(geo-disp $(current-disp $CUR))
+
+X=$((DX + 1))
+Y=$((DY + 1))
+
+case $1 in
+    top)    W=$((DW - BW*2)); H=$((DH / 2 - BW*2)) ;;
+    bottom) W=$((DW - BW*2)); H=$((DH / 2 - BW*2)); Y=$((DH / 2 + DY - 1)) ;;
+    left)   W=$((DW / 2 - BW*2)); H=$((DH - BW*2)) ;;
+    right)  W=$((DW / 2 - BW*2)); H=$((DH - BW*2)); X=$((DW / 2 + DX - 1)) ;;
+esac
+
+wtp $X $Y $W $H $CUR
