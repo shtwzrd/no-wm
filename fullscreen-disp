@@ -16,9 +16,9 @@ set_full () {
     local monitor=$1
     local window=$2
     wattr xywhi $window >$tempfile
+    chwb -s 0 $window
     wtp $(geo-disp $monitor) $window
     wtf $window
-    chwb -s 0 $window
     chwso -r $window
 }
 

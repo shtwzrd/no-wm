@@ -7,6 +7,6 @@
 
 while read active; do
     while read line; do
-        chwb -c "$(xcolor $active)" -s $BW $line
+        grep -qr $line $FULLSCREENDIR || chwb -c "$(xcolor $active)" -s $BW $line
     done < $GROUPSDIR/group.$active
 done < $GROUPSDIR/active

@@ -6,8 +6,6 @@
 # modified by warreq
 # depends on: wmutils.conf, drawborders
 
-CUR=$(pfw)
-
 . wmutils.conf
 
 usage() {
@@ -25,7 +23,7 @@ esac
 # exit if we can't find another window to focus
 test -z "$wid" && echo "$(basename $0): can't find a window to focus" >&2 && exit 1
 
-chwb -c "$(xbg)" -s $BW $(pfw)
+grep -qr $CUR $FULLSCREENDIR || chwb -c "$(xbg)" -s $BW $CUR
 
 # send to top of stack and focus
 chwso -r $wid
@@ -33,4 +31,5 @@ wtf $wid
 
 # repaint borders
 drawborders
-chwb -c "$(xfg)" -s $BW $wid
+
+grep -qr $wid $FULLSCREENDIR || chwb -c "$(xfg)" -s $BW $wid

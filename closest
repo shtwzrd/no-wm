@@ -2,10 +2,9 @@
 #
 # z3bra - 2014 (c) wtfpl
 # find and focus the closest window in a specific direction
-# depends on: focus.sh
+# depends on: focus, wmutils.conf
 
-# get current window id
-CUR=$(pfw)
+. wmutils.conf
 
 usage() {
     echo "usage: $(basename $0) <direction>" >&2
@@ -30,8 +29,8 @@ next_south() {
 
 # Use the specification of your choice: WASD, HJKL, ←↑↓→, west/north/south/east
 case $1 in
-    h|a|east|left)  focus $(next_east)  2>/dev/null ;;
+    h|a|west|left)  focus $(next_east)  2>/dev/null ;;
     j|s|south|down) focus $(next_south) 2>/dev/null ;;
     k|w|north|up)   focus $(next_north) 2>/dev/null ;;
-    l|d|west|right) focus $(next_west)  2>/dev/null ;;
+    l|d|east|right) focus $(next_west)  2>/dev/null ;;
 esac
